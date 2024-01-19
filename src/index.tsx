@@ -1,40 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './components/app/app';
-import { mockSelectedFilm } from './mocks/films.ts';
-import { Provider } from 'react-redux';
-import { store } from './store';
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AxiosInstance } from 'axios';
-import { setFilms, setFilmLoadingStatus } from './store/action';
-import { FilmType } from './types/film';
+import {Provider} from 'react-redux';
 
-type AppDispatch = typeof store.dispatch;
-store.dispatch(
-  createAsyncThunk<
-    void,
-    undefined,
-    {
-      dispatch: AppDispatch;
-      state: ReturnType<typeof store.getState>;
-      extra: AxiosInstance;
-    }
-  >('fetchFilms', async (_arg, { dispatch, extra: api }) => {
-    const { data } = await api.get<FilmType[]>('/films');
-    dispatch(setFilmLoadingStatus(true));
-    dispatch(setFilms(data));
-    dispatch(setFilmLoadingStatus(false));
-  })(),
-);
+import App from './components/app/app';
+import ScrollTopOnMount from './components/scroll-top-on-mount/scroll-top-on-mount';
+import {store} from './store/store';
+import {checkAuthAction, fetchQuestionAction, getFavoriteFilms} from './store/api-actions';
+import HistoryRouter from './components/history-route/history-route';
+import browserHistory from './browser-history';
+import 'react-toastify/dist/ReactToastify.css';
+import {ToastContainer} from 'react-toastify';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
 );
 
+store.dispatch(fetchQuestionAction());
+store.dispatch(checkAuthAction());
+store.dispatch(getFavoriteFilms());
+
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App selectedFilm={mockSelectedFilm} />
+      <HistoryRouter history={browserHistory}>
+        <ScrollTopOnMount/>
+        <ToastContainer />
+        <App/>
+      </HistoryRouter>
     </Provider>
   </React.StrictMode>,
 );

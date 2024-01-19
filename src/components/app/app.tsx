@@ -1,57 +1,43 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AppRoute, AuthorizationStatus } from '../../const';
-import PrivateRoute from '../../private-route/private-route';
-import { HelmetProvider } from 'react-helmet-async';
-import MainPage from '../../pages/main-page/main-page';
-import AddReview from '../../pages/add-review/add-review';
-import Film from '../../pages/film/film';
-import MyList from '../../pages/my-list/my-list';
-import NotFoundPage from '../../pages/not-found-page/not-found-page';
-import Player from '../../pages/player/player';
-import SignIn from '../../pages/sign-in/sign-in';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { store } from '../../store';
-import { FilmType } from '../../types/film';
+import {Route, Routes} from 'react-router-dom';
 
-export type AppProps = {
-  selectedFilm: FilmType;
-};
+import GeneralScreen from '../../pages/general-screen/general-screen';
+import {AppRoute, AuthorizationStatus} from '../../const';
+import SignInScreen from '../../pages/sign-in-screen/sign-in-screen';
+import PrivateRoute from '../private-route/private-route';
+import ReviewScreen from '../../pages/review-screen/review-screen';
+import PlayerScreen from '../../pages/player-screen/player-screen';
+import NotFoundPage from '../not-found-page/not-found-page';
+import FilmScreen from '../../pages/film-screen/film-screen';
+import MyListScreen from '../../pages/my-list-screen/my-list-screen';
 
-const useAppSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> =
-  useSelector;
-
-function App(props: AppProps): JSX.Element {
-  const { films } = useAppSelector((state) => state);
+function App(): JSX.Element {
   return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path={AppRoute.Main}
-            element={<MainPage selectedFilm={props.selectedFilm} />}
+    <Routes>
+      <Route path="/">
+        <Route index element={<GeneralScreen/>}/>
+        <Route path={AppRoute.Login} element={<SignInScreen/>}/>
+        <Route path={AppRoute.MyList} element={
+          <PrivateRoute authorizationStatus={AuthorizationStatus.Auth}>
+            <MyListScreen/>
+          </PrivateRoute>
+        }
+        />
+        <Route path={AppRoute.FilmsList}>
+          <Route path={':id'} element={<FilmScreen/>}/>
+          <Route path={`:id${AppRoute.AddReview}`} element={
+            <PrivateRoute authorizationStatus={AuthorizationStatus.Auth}>
+              <ReviewScreen/>
+            </PrivateRoute>
+          }
           />
-          <Route path={AppRoute.SignIn} element={<SignIn />} />
-          <Route path={AppRoute.Film(':id')} element={<Film films={films} />} />
-          <Route
-            path={AppRoute.AddReview(':id')}
-            element={<AddReview film={props.selectedFilm} />}
-          />
-          <Route
-            path={AppRoute.MyList}
-            element={
-              <PrivateRoute authorizationStatus={AuthorizationStatus.NoAuth}>
-                <MyList films={films} />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path={AppRoute.Player(':id')}
-            element={<Player film={props.selectedFilm} />}
-          />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
-    </HelmetProvider>
+        </Route>
+        <Route path={AppRoute.Player}>
+          <Route path={':id'} element={<PlayerScreen/>}/>
+        </Route>
+        <Route path={AppRoute.NotFoundPage} element={<NotFoundPage/>}/>
+        <Route path="*" element={<NotFoundPage/>}/>
+      </Route>
+    </Routes>
   );
 }
 

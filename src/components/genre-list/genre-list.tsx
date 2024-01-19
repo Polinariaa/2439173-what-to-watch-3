@@ -1,19 +1,13 @@
-import GenreListItem from './genre-list-item';
+import ItemGenreList from '../item-genre-list/item-genre-list';
+import {useAppSelector} from '../../hooks/hooks-toolkit';
 
-type GenresListProps = {
-  genres: string[];
-  activeGenre: string;
-};
-
-function GenreList({ genres, activeGenre }: GenresListProps): JSX.Element {
+function GenreList() {
+  const genres = useAppSelector((state) => state.filmList.genreList);
+  const selectGenre = useAppSelector((state) => state.filmList.currentGenre);
   return (
     <ul className="catalog__genres-list">
-      {genres.map((genre) => (
-        <GenreListItem
-          key={genre}
-          genre={genre}
-          isActive={genre === activeGenre}
-        />
+      {genres.map((genreItem) => (
+        <ItemGenreList key={genreItem.id} genre={genreItem.genre} active={selectGenre === genreItem.genre}/>
       ))}
     </ul>
   );
